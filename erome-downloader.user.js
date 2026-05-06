@@ -1,12 +1,8 @@
 // ==UserScript==
 // @name         Erome Downloader
-// @namespace    greasyfork.org
-// @icon         https://www.erome.com/android-chrome-192x192.png
-// @description  Modal flutuante moderno para baixar mídias do Erome com seleção múltipla e envio via Telegram
-// @include      http://erome.com/*
-// @include      http://*.erome.com/*
-// @include      https://erome.com/*
-// @include      https://*.erome.com/*
+// @description  Download de mídias do Erome com seleção múltipla e Telegram
+// @match        https://erome.com/*
+// @match        https://*.erome.com/*
 // @grant        GM_download
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
@@ -14,12 +10,7 @@
 // @connect      erome.com
 // @connect      *.erome.com
 // @connect      api.telegram.org
-// @connect      s1.erome.com
-// @connect      s2.erome.com
-// @connect      s3.erome.com
-// @connect      s4.erome.com
 // @run-at       document-end
-// @author       Darksoan
 // @version      4.1.0
 // @license      MIT
 // ==/UserScript==
