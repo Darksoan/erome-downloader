@@ -62,7 +62,10 @@ Userscript para o Erome com painel lateral moderno para selecionar mídias, baix
 
 ## Configuração do Telegram
 
-- `Token do Bot`: crie um bot no BotFather e copie o token.
+- Para enviar mídias pelo Telegram, você precisa de um bot criado no Telegram e do token desse bot.
+- Crie o bot pelo BotFather, usando o comando `/newbot`, e copie o token gerado.
+- No painel do Erome Downloader, abra a aba `Config`, cole o token em `Token do Bot` e clique em `Salvar Token`.
+- O token é salvo localmente pelo gerenciador de userscript e é usado apenas para chamar a API do Telegram.
 - `Chat ID`: informe o destino que receberá as mídias.
 - Usuário privado: use o ID numérico direto, por exemplo `123456789`.
 - Grupo ou supergrupo: use o formato completo com `-100`, por exemplo `-1001234567890`.
