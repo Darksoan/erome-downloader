@@ -30,12 +30,6 @@ Userscript para o Erome com painel lateral moderno para selecionar mídias, baix
 4. Salve e ative o script.
 5. Acesse uma página do Erome para o painel aparecer.
 
-### Opção 2: instalar pela release
-
-1. Abra a release mais recente.
-2. Baixe `erome-downloader.user.js`.
-3. Importe o arquivo na sua extensão de userscript ou cole o conteúdo em um novo script.
-
 ### Extensões compatíveis
 
 - Tampermonkey: opção mais comum no Chrome, Edge e Firefox.
