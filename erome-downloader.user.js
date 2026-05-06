@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Erome Downloader
-// @description  Download de mídias do Erome com seleção múltipla e Telegram
+// @description  Download de mídias do Erome com seleção múltipla e envio para o Telegram
 // @match        https://erome.com/*
 // @match        https://*.erome.com/*
 // @grant        GM_download
