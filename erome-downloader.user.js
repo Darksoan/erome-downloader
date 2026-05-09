@@ -11,7 +11,7 @@
 // @connect      *.erome.com
 // @connect      api.telegram.org
 // @run-at       document-end
-// @version      4.1.0
+// @version      4.2.0
 // @license      MIT
 // ==/UserScript==
 
@@ -20,6 +20,227 @@
 
     let TELEGRAM_BOT_TOKEN = GM_getValue('tg_bot_token', '');
     let TELEGRAM_CHAT_ID = GM_getValue('tg_chat_id', '');
+    let currentLang = GM_getValue('lang', 'pt-BR');
+
+    const i18n = {
+        'pt-BR': {
+            title: 'Download Manager',
+            close: 'Fechar',
+            tabDownload: 'Download',
+            tabTelegram: 'Telegram',
+            tabConfig: 'Config',
+            selectAll: 'Selecionar Todos',
+            deselectAll: 'Desselecionar Todos',
+            downloadSelected: 'Baixar Selecionados',
+            chatIdLabel: 'Chat ID',
+            chatIdPlaceholder: 'Ex: 123456789 ou -3953729181',
+            save: 'Salvar',
+            sendSelected: 'Enviar Selecionados',
+            testConnection: 'Testar Conexão',
+            botTokenLabel: 'Token do Bot',
+            botTokenPlaceholder: '1234567890:AABBccDD...',
+            saveToken: 'Salvar Token',
+            tokenPrivacy: 'O token é salvo localmente via GM_setValue e nunca enviado a terceiros.',
+            languageLabel: 'Idioma',
+            counter: (n) => `${n} selecionados`,
+            loadingMedia: 'Carregando mídias...',
+            noMediaFound: 'Nenhuma mídia encontrada',
+            noMediaFoundDesc: 'Não foi possível encontrar imagens ou vídeos nesta página.',
+            openManager: 'Abrir Download Manager',
+            errorConfigToken: 'Configure o Token do Bot na aba Config.',
+            errorConfigChatId: 'Informe um Chat ID na aba Telegram.',
+            errorConfigTokenToast: 'Configure o Token do Bot primeiro. Clique na barra rosa à direita para abrir as configurações.',
+            errorConfigChatIdToast: 'Configure o Chat ID primeiro. Clique na barra rosa à direita para abrir as configurações.',
+            selectAtLeastOne: 'Selecione pelo menos uma mídia para baixar.',
+            selectAtLeastOneMedia: 'Selecione pelo menos uma mídia.',
+            chatIdRequired: 'Digite um Chat ID válido.',
+            tokenRequired: 'Token não pode ser vazio.',
+            chatIdSaved: 'Chat ID salvo!',
+            chatIdConverted: (id) => ` (convertido para ${id})`,
+            tokenSaved: 'Token salvo com segurança!',
+            testingWith: (id) => `Testando com Chat ID: ${id}...`,
+            connectionSuccess: (id) => `Conexão bem-sucedida! (ID: ${id})`,
+            connectionError: (desc, id) => `Erro: ${desc} (ID usado: ${id})`,
+            invalidApiResponse: 'Resposta inválida da API.',
+            networkError: 'Falha de rede ao conectar com o Telegram.',
+            downloadStarted: (name) => `Download iniciado: ${name}`,
+            filesDownloaded: (n) => `${n} arquivo(s) enviado(s) para download!`,
+            sendingFile: (name) => `Enviando ${name}...`,
+            sent: (name) => `Enviado: ${name}`,
+            sendError: (msg) => `Erro ao enviar: ${msg}`,
+            downloadError: (msg) => `Erro ao baixar: ${msg}`,
+            downloadBlobError: 'Falha ao baixar a mídia do Erome',
+            preparingSend: (n) => `Preparando envio de ${n} arquivo(s)...`,
+            downloadingGroup: (cur, total, count) => `Baixando grupo ${cur}/${total} (${count} arquivos)...`,
+            sendingGroup: (cur, total) => `Enviando grupo ${cur}/${total}...`,
+            allSent: (n, groups) => `${n} arquivo(s) enviado(s) com sucesso em ${groups} grupo(s)!`,
+            partialSent: (ok, err) => `${ok} enviado(s), ${err} erro(s). Veja o console (F12).`,
+            groupError: (num, msg) => `Erro no grupo ${num}: ${msg}`,
+            groupDownloadError: (num, error) => `Erro ao baixar grupo ${num}: ${error}`,
+            sendSuccess: 'Enviado com sucesso',
+            sendErrorTitle: 'Erro ao enviar',
+            downloadErrorTitle: 'Erro ao baixar',
+            configNeeded: 'Configuração necessária',
+            tgConnected: 'Erome Download Manager conectado com sucesso!',
+            downloadBtn: '↓',
+            telegramBtn: '➤',
+            downloadBtnDone: '✓',
+            downloadBtnFail: '✕',
+            inlineDownloadTitle: 'Download',
+            inlineTelegramTitle: 'Enviar para Telegram',
+            previewAlt: 'Preview',
+            nonOkHttpStatus: (status) => `Download falhou (HTTP ${status})`,
+            parseError: 'Falha ao parsear resposta do Telegram',
+            uploadNetworkError: 'Erro de rede no upload',
+        },
+        'en-US': {
+            title: 'Download Manager',
+            close: 'Close',
+            tabDownload: 'Download',
+            tabTelegram: 'Telegram',
+            tabConfig: 'Config',
+            selectAll: 'Select All',
+            deselectAll: 'Deselect All',
+            downloadSelected: 'Download Selected',
+            chatIdLabel: 'Chat ID',
+            chatIdPlaceholder: 'Ex: 123456789 or -3953729181',
+            save: 'Save',
+            sendSelected: 'Send Selected',
+            testConnection: 'Test Connection',
+            botTokenLabel: 'Bot Token',
+            botTokenPlaceholder: '1234567890:AABBccDD...',
+            saveToken: 'Save Token',
+            tokenPrivacy: 'The token is saved locally via GM_setValue and never sent to third parties.',
+            languageLabel: 'Language',
+            counter: (n) => `${n} selected`,
+            loadingMedia: 'Loading media...',
+            noMediaFound: 'No media found',
+            noMediaFoundDesc: 'Could not find images or videos on this page.',
+            openManager: 'Open Download Manager',
+            errorConfigToken: 'Configure the Bot Token in the Config tab.',
+            errorConfigChatId: 'Enter a Chat ID in the Telegram tab.',
+            errorConfigTokenToast: 'Configure the Bot Token first. Click the pink bar on the right to open settings.',
+            errorConfigChatIdToast: 'Configure the Chat ID first. Click the pink bar on the right to open settings.',
+            selectAtLeastOne: 'Select at least one media to download.',
+            selectAtLeastOneMedia: 'Select at least one media.',
+            chatIdRequired: 'Enter a valid Chat ID.',
+            tokenRequired: 'Token cannot be empty.',
+            chatIdSaved: 'Chat ID saved!',
+            chatIdConverted: (id) => ` (converted to ${id})`,
+            tokenSaved: 'Token saved successfully!',
+            testingWith: (id) => `Testing with Chat ID: ${id}...`,
+            connectionSuccess: (id) => `Connection successful! (ID: ${id})`,
+            connectionError: (desc, id) => `Error: ${desc} (ID used: ${id})`,
+            invalidApiResponse: 'Invalid API response.',
+            networkError: 'Network error connecting to Telegram.',
+            downloadStarted: (name) => `Download started: ${name}`,
+            filesDownloaded: (n) => `${n} file(s) sent for download!`,
+            sendingFile: (name) => `Sending ${name}...`,
+            sent: (name) => `Sent: ${name}`,
+            sendError: (msg) => `Error sending: ${msg}`,
+            downloadError: (msg) => `Download error: ${msg}`,
+            downloadBlobError: 'Failed to download media from Erome',
+            preparingSend: (n) => `Preparing to send ${n} file(s)...`,
+            downloadingGroup: (cur, total, count) => `Downloading group ${cur}/${total} (${count} files)...`,
+            sendingGroup: (cur, total) => `Sending group ${cur}/${total}...`,
+            allSent: (n, groups) => `${n} file(s) sent successfully in ${groups} group(s)!`,
+            partialSent: (ok, err) => `${ok} sent, ${err} error(s). Check console (F12).`,
+            groupError: (num, msg) => `Error in group ${num}: ${msg}`,
+            groupDownloadError: (num, error) => `Error downloading group ${num}: ${error}`,
+            sendSuccess: 'Sent successfully',
+            sendErrorTitle: 'Error sending',
+            downloadErrorTitle: 'Download error',
+            configNeeded: 'Configuration required',
+            tgConnected: 'Erome Download Manager connected successfully!',
+            downloadBtn: '↓',
+            telegramBtn: '➤',
+            downloadBtnDone: '✓',
+            downloadBtnFail: '✕',
+            inlineDownloadTitle: 'Download',
+            inlineTelegramTitle: 'Send to Telegram',
+            previewAlt: 'Preview',
+            nonOkHttpStatus: (status) => `Download failed (HTTP ${status})`,
+            parseError: 'Failed to parse Telegram response',
+            uploadNetworkError: 'Network error on upload',
+        },
+        'es': {
+            title: 'Gestor de Descargas',
+            close: 'Cerrar',
+            tabDownload: 'Descargar',
+            tabTelegram: 'Telegram',
+            tabConfig: 'Config',
+            selectAll: 'Seleccionar Todos',
+            deselectAll: 'Deseleccionar Todos',
+            downloadSelected: 'Descargar Seleccionados',
+            chatIdLabel: 'Chat ID',
+            chatIdPlaceholder: 'Ej: 123456789 o -3953729181',
+            save: 'Guardar',
+            sendSelected: 'Enviar Seleccionados',
+            testConnection: 'Probar Conexión',
+            botTokenLabel: 'Token del Bot',
+            botTokenPlaceholder: '1234567890:AABBccDD...',
+            saveToken: 'Guardar Token',
+            tokenPrivacy: 'El token se guarda localmente vía GM_setValue y nunca se envía a terceros.',
+            languageLabel: 'Idioma',
+            counter: (n) => `${n} seleccionados`,
+            loadingMedia: 'Cargando medios...',
+            noMediaFound: 'No se encontraron medios',
+            noMediaFoundDesc: 'No se pudieron encontrar imágenes o videos en esta página.',
+            openManager: 'Abrir Gestor de Descargas',
+            errorConfigToken: 'Configure el Token del Bot en la pestaña Config.',
+            errorConfigChatId: 'Ingrese un Chat ID en la pestaña Telegram.',
+            errorConfigTokenToast: 'Configure el Token del Bot primero. Haga clic en la barra rosa a la derecha para abrir la configuración.',
+            errorConfigChatIdToast: 'Configure el Chat ID primero. Haga clic en la barra rosa a la derecha para abrir la configuración.',
+            selectAtLeastOne: 'Seleccione al menos un medio para descargar.',
+            selectAtLeastOneMedia: 'Seleccione al menos un medio.',
+            chatIdRequired: 'Ingrese un Chat ID válido.',
+            tokenRequired: 'El Token no puede estar vacío.',
+            chatIdSaved: '¡Chat ID guardado!',
+            chatIdConverted: (id) => ` (convertido a ${id})`,
+            tokenSaved: '¡Token guardado con éxito!',
+            testingWith: (id) => `Probando con Chat ID: ${id}...`,
+            connectionSuccess: (id) => `¡Conexión exitosa! (ID: ${id})`,
+            connectionError: (desc, id) => `Error: ${desc} (ID usado: ${id})`,
+            invalidApiResponse: 'Respuesta de API inválida.',
+            networkError: 'Error de red al conectar con Telegram.',
+            downloadStarted: (name) => `Descarga iniciada: ${name}`,
+            filesDownloaded: (n) => `¡${n} archivo(s) enviado(s) para descarga!`,
+            sendingFile: (name) => `Enviando ${name}...`,
+            sent: (name) => `Enviado: ${name}`,
+            sendError: (msg) => `Error al enviar: ${msg}`,
+            downloadError: (msg) => `Error al descargar: ${msg}`,
+            downloadBlobError: 'Error al descargar el medio de Erome',
+            preparingSend: (n) => `Preparando envío de ${n} archivo(s)...`,
+            downloadingGroup: (cur, total, count) => `Descargando grupo ${cur}/${total} (${count} archivos)...`,
+            sendingGroup: (cur, total) => `Enviando grupo ${cur}/${total}...`,
+            allSent: (n, groups) => `¡${n} archivo(s) enviado(s) con éxito en ${groups} grupo(s)!`,
+            partialSent: (ok, err) => `${ok} enviado(s), ${err} error(es). Vea la consola (F12).`,
+            groupError: (num, msg) => `Error en grupo ${num}: ${msg}`,
+            groupDownloadError: (num, error) => `Error al descargar grupo ${num}: ${error}`,
+            sendSuccess: 'Enviado con éxito',
+            sendErrorTitle: 'Error al enviar',
+            downloadErrorTitle: 'Error de descarga',
+            configNeeded: 'Configuración necesaria',
+            tgConnected: '¡Erome Download Manager conectado con éxito!',
+            downloadBtn: '↓',
+            telegramBtn: '➤',
+            downloadBtnDone: '✓',
+            downloadBtnFail: '✕',
+            inlineDownloadTitle: 'Descargar',
+            inlineTelegramTitle: 'Enviar a Telegram',
+            previewAlt: 'Vista previa',
+            nonOkHttpStatus: (status) => `Descarga fallida (HTTP ${status})`,
+            parseError: 'Error al procesar respuesta de Telegram',
+            uploadNetworkError: 'Error de red en la subida',
+        }
+    };
+
+    const t = (key, ...args) => {
+        const lang = i18n[currentLang] ? currentLang : 'pt-BR';
+        const val = i18n[lang][key] || i18n['pt-BR'][key];
+        if (typeof val === 'function') return val(...args);
+        return val;
+    };
 
     const COLORS = {
         background: '#000000',
@@ -133,7 +354,9 @@
             .erome-input-label {
                 font-size: 11px; color: ${COLORS.textSecondary}; font-weight: 600;
                 text-transform: uppercase; letter-spacing: 0.5px;
+                display: flex; align-items: center; gap: 5px;
             }
+            .erome-label-icon { flex-shrink: 0; }
             .erome-input {
                 padding: 9px 12px; background: ${COLORS.cardBg};
                 border: 1px solid ${COLORS.border}; border-radius: 4px;
@@ -141,6 +364,7 @@
                 box-sizing: border-box; transition: border-color 0.2s ease; outline: none;
             }
             .erome-input:focus { border-color: ${COLORS.primary}; }
+            .erome-input-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='${COLORS.textSecondary}' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
             .erome-input-row { display: flex; gap: 8px; align-items: flex-end; }
             .erome-input-row .erome-input-group { flex: 1; }
             .erome-input-row .erome-btn { width: auto; padding: 9px 14px; white-space: nowrap; flex-shrink: 0; }
@@ -390,7 +614,7 @@
     const createSidebarTrigger = () => {
         const trigger = document.createElement('div');
         trigger.id = 'erome-sidebar-trigger';
-        trigger.title = 'Abrir Download Manager';
+        trigger.title = t('openManager');
         trigger.onclick = openModal;
         document.body.appendChild(trigger);
     };
@@ -441,9 +665,9 @@
         modal.id = 'erome-modal';
         modal.innerHTML = `
             <div id="erome-modal-header">
-                <h2 id="erome-modal-title">Download Manager</h2>
-                <div class="erome-counter" id="erome-counter">0 selecionados</div>
-                <button id="erome-modal-close">Fechar</button>
+                <h2 id="erome-modal-title">${t('title')}</h2>
+                <div class="erome-counter" id="erome-counter">${t('counter', 0)}</div>
+                <button id="erome-modal-close">${t('close')}</button>
             </div>
 
             <div id="erome-modal-controls">
@@ -451,47 +675,62 @@
                 <div id="erome-progress-bar-wrap"><div id="erome-progress-bar"></div></div>
 
                 <div class="erome-tabs">
-                    <button class="erome-tab active" data-tab="download">Download</button>
-                    <button class="erome-tab"        data-tab="telegram">Telegram</button>
-                    <button class="erome-tab"        data-tab="config">Config</button>
+                    <button class="erome-tab active" data-tab="download">${t('tabDownload')}</button>
+                    <button class="erome-tab"        data-tab="telegram">${t('tabTelegram')}</button>
+                    <button class="erome-tab"        data-tab="config">${t('tabConfig')}</button>
                 </div>
 
                 <!-- Aba Download -->
                 <div class="erome-tab-panel active" id="tab-download">
-                    <button class="erome-btn" id="erome-select-all">Selecionar Todos</button>
-                    <button class="erome-btn" id="erome-deselect-all">Desselecionar Todos</button>
-                    <button class="erome-btn erome-btn-primary" id="erome-download-selected">Baixar Selecionados</button>
+                    <button class="erome-btn" id="erome-select-all">${t('selectAll')}</button>
+                    <button class="erome-btn" id="erome-deselect-all">${t('deselectAll')}</button>
+                    <button class="erome-btn erome-btn-primary" id="erome-download-selected">${t('downloadSelected')}</button>
                 </div>
 
                 <!-- Aba Telegram -->
                 <div class="erome-tab-panel" id="tab-telegram">
                     <div class="erome-input-row">
                         <div class="erome-input-group">
-                            <label class="erome-input-label">Chat ID</label>
+                            <label class="erome-input-label" id="label-chat-id">${t('chatIdLabel')}</label>
                             <input id="erome-chat-id-input" class="erome-input"
-                                   placeholder="Ex: 123456789 ou -3953729181"
+                                   placeholder="${t('chatIdPlaceholder')}"
                                    value="${TELEGRAM_CHAT_ID}" />
                         </div>
-                        <button class="erome-btn erome-btn-telegram" id="erome-save-chat-id">Salvar</button>
+                        <button class="erome-btn erome-btn-telegram" id="erome-save-chat-id">${t('save')}</button>
                     </div>
 
                     <div id="erome-chat-history" class="erome-chat-history"></div>
                     <hr class="erome-divider">
-                    <button class="erome-btn erome-btn-telegram" id="erome-send-telegram">Enviar Selecionados</button>
-                    <button class="erome-btn" id="erome-test-telegram" style="font-size:12px;">Testar Conexão</button>
+                    <button class="erome-btn erome-btn-telegram" id="erome-send-telegram">${t('sendSelected')}</button>
+                    <button class="erome-btn" id="erome-test-telegram" style="font-size:12px;">${t('testConnection')}</button>
                 </div>
 
                 <!-- Aba Config -->
                 <div class="erome-tab-panel" id="tab-config">
                     <div class="erome-input-group">
-                        <label class="erome-input-label">Token do Bot</label>
+                        <label class="erome-input-label" id="label-language">
+                            <svg class="erome-label-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                            <span>${t('languageLabel')}</span>
+                        </label>
+                        <select id="erome-lang-select" class="erome-input erome-input-select" style="cursor:pointer;">
+                            <option value="pt-BR" ${currentLang === 'pt-BR' ? 'selected' : ''}>Português (BR)</option>
+                            <option value="en-US" ${currentLang === 'en-US' ? 'selected' : ''}>English (US)</option>
+                            <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Español</option>
+                        </select>
+                    </div>
+                    <div class="erome-input-group">
+                        <label class="erome-input-label" id="label-bot-token">${t('botTokenLabel')}</label>
                         <input id="erome-bot-token-input" class="erome-input" type="password"
-                               placeholder="1234567890:AABBccDD..."
+                               placeholder="${t('botTokenPlaceholder')}"
                                value="${TELEGRAM_BOT_TOKEN}" />
                     </div>
-                    <button class="erome-btn erome-btn-primary" id="erome-save-token">Salvar Token</button>
-                    <p style="font-size:11px;color:${COLORS.textSecondary};margin:0;">
-                        O token é salvo localmente via GM_setValue e nunca enviado a terceiros.
+                    <button class="erome-btn erome-btn-primary" id="erome-save-token">${t('saveToken')}</button>
+                    <p id="p-token-privacy" style="font-size:11px;color:${COLORS.textSecondary};margin:0;">
+                        ${t('tokenPrivacy')}
                     </p>
                 </div>
             </div>
@@ -499,7 +738,7 @@
             <div id="erome-modal-content">
                 <div class="erome-loading">
                     <div class="erome-spinner"></div>
-                    Carregando mídias...
+                    ${t('loadingMedia')}
                 </div>
             </div>
         `;
@@ -524,13 +763,13 @@
 
         document.getElementById('erome-save-chat-id').onclick = () => {
             const val = document.getElementById('erome-chat-id-input').value.trim();
-            if (!val) { showNotification('Digite um Chat ID válido.', 'error', 3000); return; }
+            if (!val) { showNotification(t('chatIdRequired'), 'error', 3000); return; }
             const normalized = normalizeChatId(val);
             TELEGRAM_CHAT_ID = normalized;
             GM_setValue('tg_chat_id', normalized);
             saveChatToHistory(normalized, val);
-            const changed = normalized !== val ? ` (convertido para ${normalized})` : '';
-            showNotification(`Chat ID salvo!${changed}`, 'success', 3500);
+            const changed = normalized !== val ? t('chatIdConverted', normalized) : '';
+            showNotification(`${t('chatIdSaved')}${changed}`, 'success', 3500);
         };
 
         document.getElementById('erome-send-telegram').onclick = sendToTelegram;
@@ -538,10 +777,16 @@
 
         document.getElementById('erome-save-token').onclick = () => {
             const val = document.getElementById('erome-bot-token-input').value.trim();
-            if (!val) { showNotification('Token não pode ser vazio.', 'error', 3000); return; }
+            if (!val) { showNotification(t('tokenRequired'), 'error', 3000); return; }
             TELEGRAM_BOT_TOKEN = val;
             GM_setValue('tg_bot_token', val);
-            showNotification('Token salvo com segurança!', 'success', 2500);
+            showNotification(t('tokenSaved'), 'success', 2500);
+        };
+
+        document.getElementById('erome-lang-select').onchange = (e) => {
+            currentLang = e.target.value;
+            GM_setValue('lang', currentLang);
+            refreshModalTexts();
         };
 
         renderChatHistory();
@@ -651,8 +896,8 @@
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'erome-inline-actions';
             actionsDiv.innerHTML = `
-                <button class="erome-inline-btn download" data-index="${index}" title="Download">↓</button>
-                <button class="erome-inline-btn telegram" data-index="${index}" title="Enviar para Telegram">➤</button>
+                <button class="erome-inline-btn download" data-index="${index}" title="${t('inlineDownloadTitle')}">${t('downloadBtn')}</button>
+                <button class="erome-inline-btn telegram" data-index="${index}" title="${t('inlineTelegramTitle')}">${t('telegramBtn')}</button>
             `;
 
             const container = group.querySelector('.video') || group.querySelector('.img');
@@ -691,9 +936,9 @@
             onload: () => {
                 btnElement.disabled = false;
                 btnElement.classList.remove('loading');
-                btnElement.innerHTML = '✓';
+                btnElement.innerHTML = t('downloadBtnDone');
                 setTimeout(() => {
-                    btnElement.innerHTML = '↓';
+                    btnElement.innerHTML = t('downloadBtn');
                 }, 2000);
             },
             onerror: () => {
@@ -707,9 +952,9 @@
 
                 btnElement.disabled = false;
                 btnElement.classList.remove('loading');
-                btnElement.innerHTML = '✓';
+                btnElement.innerHTML = t('downloadBtnDone');
                 setTimeout(() => {
-                    btnElement.innerHTML = '↓';
+                    btnElement.innerHTML = t('downloadBtn');
                 }, 2000);
             }
         });
@@ -721,8 +966,8 @@
 
         if (!token) {
             showToast(
-                'Configuração necessária',
-                'Configure o Token do Bot primeiro. Clique na barra rosa à direita para abrir as configurações.',
+                t('configNeeded'),
+                t('errorConfigTokenToast'),
                 'error',
                 5000
             );
@@ -730,8 +975,8 @@
         }
         if (!chatId) {
             showToast(
-                'Configuração necessária',
-                'Configure o Chat ID primeiro. Clique na barra rosa à direita para abrir as configurações.',
+                t('configNeeded'),
+                t('errorConfigChatIdToast'),
                 'error',
                 5000
             );
@@ -760,33 +1005,33 @@
                     () => {
                         btnElement.disabled = false;
                         btnElement.classList.remove('loading');
-                        btnElement.innerHTML = '✓';
-                        showToast('Enviado com sucesso', fileName, 'success', 3000);
+                        btnElement.innerHTML = t('downloadBtnDone');
+                        showToast(t('sendSuccess'), fileName, 'success', 3000);
                         setTimeout(() => {
-                            btnElement.innerHTML = '➤';
+                            btnElement.innerHTML = t('telegramBtn');
                         }, 2000);
                     },
                     (errMsg) => {
                         btnElement.disabled = false;
                         btnElement.classList.remove('loading');
-                        btnElement.innerHTML = '✕';
-                        showToast('Erro ao enviar', errMsg, 'error', 4000);
+                        btnElement.innerHTML = t('downloadBtnFail');
+                        showToast(t('sendErrorTitle'), errMsg, 'error', 4000);
                         setTimeout(() => {
-                            btnElement.innerHTML = '➤';
+                            btnElement.innerHTML = t('telegramBtn');
                         }, 3000);
-                        console.error('[Telegram] Erro:', errMsg);
+                        console.error('[Telegram] Error:', errMsg);
                     }
                 );
             },
             (error) => {
                 btnElement.disabled = false;
                 btnElement.classList.remove('loading');
-                btnElement.innerHTML = '✕';
-                showToast('Erro ao baixar', error, 'error', 4000);
+                btnElement.innerHTML = t('downloadBtnFail');
+                showToast(t('downloadErrorTitle'), error, 'error', 4000);
                 setTimeout(() => {
-                    btnElement.innerHTML = '➤';
+                    btnElement.innerHTML = t('telegramBtn');
                 }, 3000);
-                console.error('[Download] Erro:', error);
+                console.error('[Download] Error:', error);
             }
         );
     };
@@ -811,8 +1056,8 @@
         if (mediaItems.length === 0) {
             content.innerHTML = `
                 <div class="erome-empty">
-                    <h3 style="color:${COLORS.text};margin-bottom:10px;">Nenhuma mídia encontrada</h3>
-                    <p>Não foi possível encontrar imagens ou vídeos nesta página.</p>
+                    <h3 style="color:${COLORS.text};margin-bottom:10px;">${t('noMediaFound')}</h3>
+                    <p>${t('noMediaFoundDesc')}</p>
                 </div>`;
             return;
         }
@@ -825,7 +1070,7 @@
 
             itemDiv.innerHTML = `
                 <div class="erome-checkbox"></div>
-                <img src="${preview}" class="erome-media-preview" alt="Preview" loading="lazy">
+                <img src="${preview}" class="erome-media-preview" alt="${t('previewAlt')}" loading="lazy">
                 <div class="erome-media-info">
                     <span class="erome-media-type">${item.type === 'IMG' ? 'IMG' : 'VID'}</span>
                     <div class="erome-media-url">${fileName}</div>
@@ -843,7 +1088,7 @@
     const deselectAll = () => { selectedItems.clear(); renderMediaList(); };
     const updateCounter = () => {
         const el = document.getElementById('erome-counter');
-        if (el) el.textContent = `${selectedItems.size} selecionados`;
+        if (el) el.textContent = t('counter', selectedItems.size);
     };
 
     const downloadSingle = (item, btnElement) => {
@@ -859,7 +1104,7 @@
             onload: () => {
                 btnElement.disabled = false;
                 btnElement.classList.remove('loading');
-                showNotification(`Download iniciado: ${fileName}`, 'success', 2500);
+                showNotification(t('downloadStarted', fileName), 'success', 2500);
             },
             onerror: () => {
                 const a = document.createElement('a');
@@ -872,7 +1117,7 @@
 
                 btnElement.disabled = false;
                 btnElement.classList.remove('loading');
-                showNotification(`Download iniciado: ${fileName}`, 'success', 2500);
+                showNotification(t('downloadStarted', fileName), 'success', 2500);
             }
         });
     };
@@ -883,11 +1128,11 @@
         const token = TELEGRAM_BOT_TOKEN;
 
         if (!token) {
-            showNotification('Configure o Token do Bot na aba Config.', 'error', 4000);
+            showNotification(t('errorConfigToken'), 'error', 4000);
             return;
         }
         if (!chatId) {
-            showNotification('Informe um Chat ID na aba Telegram.', 'error', 4000);
+            showNotification(t('errorConfigChatId'), 'error', 4000);
             return;
         }
 
@@ -895,7 +1140,7 @@
         btnElement.classList.add('loading');
 
         const fileName = getFileName(item.src, item, item.id + 1);
-        showNotification(`Enviando ${fileName}...`, 'info');
+        showNotification(t('sendingFile', fileName), 'info');
 
         downloadBlob(
             item.src,
@@ -914,25 +1159,25 @@
                     () => {
                         btnElement.disabled = false;
                         btnElement.classList.remove('loading');
-                        showNotification(`Enviado: ${fileName}`, 'success', 3000);
+                        showNotification(t('sent', fileName), 'success', 3000);
                     },
                     (errMsg) => {
                         btnElement.disabled = false;
                         btnElement.classList.remove('loading');
-                        showNotification(`Erro ao enviar: ${errMsg}`, 'error', 4000);
+                        showNotification(t('sendError', errMsg), 'error', 4000);
                     }
                 );
             },
             (error) => {
                 btnElement.disabled = false;
                 btnElement.classList.remove('loading');
-                showNotification(`Erro ao baixar: ${error}`, 'error', 4000);
+                showNotification(t('downloadError', error), 'error', 4000);
             }
         );
     };
     const downloadSelected = () => {
         if (selectedItems.size === 0) {
-            showNotification('⚠️ Selecione pelo menos uma mídia para baixar.', 'error', 3000);
+            showNotification(t('selectAtLeastOne'), 'error', 3000);
             return;
         }
         const btn = document.getElementById('erome-download-selected');
@@ -949,8 +1194,8 @@
             if (done === total) {
                 btn.disabled = false;
                 btn.classList.remove('erome-btn-loading');
-                btn.textContent = '⬇ Baixar Selecionados';
-                showNotification(`${total} arquivo(s) enviado(s) para download!`, 'success', 4000);
+                btn.textContent = '⬇ ' + t('downloadSelected');
+                showNotification(t('filesDownloaded', total), 'success', 4000);
             }
         };
 
@@ -981,27 +1226,27 @@
         const chatId = normalizeChatId(rawId);
         const token = TELEGRAM_BOT_TOKEN;
 
-        if (!token) { showNotification('⚠️ Configure o Token do Bot na aba Config.', 'error', 4000); return; }
-        if (!chatId) { showNotification('⚠️ Informe um Chat ID.', 'error', 4000); return; }
+        if (!token) { showNotification(t('errorConfigToken'), 'error', 4000); return; }
+        if (!chatId) { showNotification(t('errorConfigChatId'), 'error', 4000); return; }
 
-        showNotification(`Testando com Chat ID: ${chatId}...`, 'info');
+        showNotification(t('testingWith', chatId), 'info');
 
         GM_xmlhttpRequest({
             method: 'POST',
             url: `https://api.telegram.org/bot${token}/sendMessage`,
             headers: { 'Content-Type': 'application/json' },
-            data: JSON.stringify({ chat_id: chatId, text: 'Erome Download Manager conectado com sucesso!' }),
+            data: JSON.stringify({ chat_id: chatId, text: t('tgConnected') }),
             onload: (res) => {
                 try {
                     const json = JSON.parse(res.responseText);
                     if (json.ok) {
-                        showNotification(`Conexão bem-sucedida! (ID: ${chatId})`, 'success', 5000);
+                        showNotification(t('connectionSuccess', chatId), 'success', 5000);
                     } else {
-                        showNotification(`Erro: ${json.description} (ID usado: ${chatId})`, 'error', 8000);
+                        showNotification(t('connectionError', json.description, chatId), 'error', 8000);
                     }
-                } catch { showNotification('Resposta inválida da API.', 'error', 4000); }
+                } catch { showNotification(t('invalidApiResponse'), 'error', 4000); }
             },
-            onerror: () => showNotification('Falha de rede ao conectar com o Telegram.', 'error', 4000)
+            onerror: () => showNotification(t('networkError'), 'error', 4000)
         });
     };
 
@@ -1017,14 +1262,14 @@
             },
             onload: (res) => {
                 if (!res.response || res.status < 200 || res.status >= 300) {
-                    onError(`Download falhou (HTTP ${res.status})`);
+                    onError(t('nonOkHttpStatus', res.status));
                     return;
                 }
                 onSuccess(res.response);
             },
             onerror: (e) => {
-                console.error('[TG] Falha ao baixar mídia:', e);
-                onError('Falha ao baixar a mídia do Erome');
+                console.error('[TG] Download failed:', e);
+                onError(t('downloadBlobError'));
             }
         });
     };
@@ -1058,16 +1303,16 @@
                     if (json.ok) {
                         onDone();
                     } else {
-                        console.error('[TG] Erro ao enviar grupo:', json.description);
+                        console.error('[TG] Group send error:', json.description);
                         onError(json.description);
                     }
                 } catch (e) {
-                    onError('Falha ao parsear resposta do Telegram');
+                    onError(t('parseError'));
                 }
             },
             onerror: (e) => {
-                console.error('[TG] Falha de rede no upload do grupo:', e);
-                onError('Erro de rede no upload');
+                console.error('[TG] Upload network error:', e);
+                onError(t('uploadNetworkError'));
             }
         });
     };
@@ -1077,9 +1322,9 @@
         const chatId = normalizeChatId(rawId);
         const token = TELEGRAM_BOT_TOKEN;
 
-        if (!token) { showNotification('Configure o Token do Bot na aba Config.', 'error', 4000); return; }
-        if (!chatId) { showNotification('Informe um Chat ID na aba Telegram.', 'error', 4000); return; }
-        if (selectedItems.size === 0) { showNotification('Selecione pelo menos uma mídia.', 'error', 3000); return; }
+        if (!token) { showNotification(t('errorConfigToken'), 'error', 4000); return; }
+        if (!chatId) { showNotification(t('errorConfigChatId'), 'error', 4000); return; }
+        if (selectedItems.size === 0) { showNotification(t('selectAtLeastOneMedia'), 'error', 3000); return; }
 
         TELEGRAM_CHAT_ID = chatId;
         GM_setValue('tg_chat_id', chatId);
@@ -1093,7 +1338,7 @@
         btn.disabled = true;
         btn.classList.add('erome-btn-loading');
         setProgress(0, total);
-        showNotification(`Preparando envio de ${total} arquivo(s)...`, 'info');
+        showNotification(t('preparingSend', total), 'info');
 
         const BATCH_SIZE = 10;
         const batches = [];
@@ -1107,17 +1352,17 @@
             if (currentBatch >= batches.length) {
                 btn.disabled = false;
                 btn.classList.remove('erome-btn-loading');
-                btn.textContent = '✈ Enviar Selecionados';
+                btn.textContent = '✈ ' + t('sendSelected');
                 const msg = errors === 0
-                    ? `${total} arquivo(s) enviado(s) com sucesso em ${batches.length} grupo(s)!`
-                    : `${total - errors} enviado(s), ${errors} erro(s). Veja o console (F12).`;
+                    ? t('allSent', total, batches.length)
+                    : t('partialSent', total - errors, errors);
                 showNotification(msg, errors === 0 ? 'success' : 'error', 8000);
                 return;
             }
 
             const batch = batches[currentBatch];
             const batchNum = currentBatch + 1;
-            showNotification(`Baixando grupo ${batchNum}/${batches.length} (${batch.length} arquivos)...`, 'info');
+            showNotification(t('downloadingGroup', batchNum, batches.length, batch.length), 'info');
 
             const downloadPromises = batch.map((item, idx) => {
                 return new Promise((resolve, reject) => {
@@ -1139,7 +1384,7 @@
 
             Promise.all(downloadPromises)
                 .then((mediaGroup) => {
-                    showNotification(`Enviando grupo ${batchNum}/${batches.length}...`, 'info');
+                    showNotification(t('sendingGroup', batchNum, batches.length), 'info');
 
                     sendMediaGroup(
                         token,
@@ -1155,7 +1400,7 @@
                             errors += batch.length;
                             done += batch.length;
                             setProgress(done, total);
-                            showNotification(`Erro no grupo ${batchNum}: ${errMsg}`, 'error', 5000);
+                            showNotification(t('groupError', batchNum, errMsg), 'error', 5000);
                             currentBatch++;
                             setTimeout(() => processBatch(), 1000);
                         }
@@ -1165,13 +1410,77 @@
                     errors += batch.length;
                     done += batch.length;
                     setProgress(done, total);
-                    showNotification(`Erro ao baixar grupo ${batchNum}: ${error}`, 'error', 5000);
+                    showNotification(t('groupDownloadError', batchNum, error), 'error', 5000);
                     currentBatch++;
                     setTimeout(() => processBatch(), 1000);
                 });
         };
 
         processBatch();
+    };
+
+    const refreshModalTexts = () => {
+        const titleEl = document.getElementById('erome-modal-title');
+        if (titleEl) titleEl.textContent = t('title');
+
+        const closeEl = document.getElementById('erome-modal-close');
+        if (closeEl) closeEl.textContent = t('close');
+
+        const counterEl = document.getElementById('erome-counter');
+        if (counterEl) counterEl.textContent = t('counter', selectedItems.size);
+
+        const trigger = document.getElementById('erome-sidebar-trigger');
+        if (trigger) trigger.title = t('openManager');
+
+        // Tabs
+        const tabs = document.querySelectorAll('.erome-tab');
+        if (tabs.length >= 3) {
+            tabs[0].textContent = t('tabDownload');
+            tabs[1].textContent = t('tabTelegram');
+            tabs[2].textContent = t('tabConfig');
+        }
+
+        // Download tab buttons
+        const selAll = document.getElementById('erome-select-all');
+        if (selAll) selAll.textContent = t('selectAll');
+        const deselAll = document.getElementById('erome-deselect-all');
+        if (deselAll) deselAll.textContent = t('deselectAll');
+        const dlSel = document.getElementById('erome-download-selected');
+        if (dlSel) dlSel.textContent = t('downloadSelected');
+
+        // Telegram tab
+        const chatIdLabel = document.getElementById('label-chat-id');
+        if (chatIdLabel) chatIdLabel.textContent = t('chatIdLabel');
+        const chatIdInput = document.getElementById('erome-chat-id-input');
+        if (chatIdInput) chatIdInput.placeholder = t('chatIdPlaceholder');
+        const saveChatBtn = document.getElementById('erome-save-chat-id');
+        if (saveChatBtn) saveChatBtn.textContent = t('save');
+        const sendTelBtn = document.getElementById('erome-send-telegram');
+        if (sendTelBtn) sendTelBtn.textContent = t('sendSelected');
+        const testBtn = document.getElementById('erome-test-telegram');
+        if (testBtn) testBtn.textContent = t('testConnection');
+
+        // Config tab
+        const langLabel = document.getElementById('label-language');
+        if (langLabel) {
+            const span = langLabel.querySelector('span');
+            if (span) span.textContent = t('languageLabel');
+        }
+        const botLabel = document.getElementById('label-bot-token');
+        if (botLabel) botLabel.textContent = t('botTokenLabel');
+        const botInput = document.getElementById('erome-bot-token-input');
+        if (botInput) botInput.placeholder = t('botTokenPlaceholder');
+        const saveTokenBtn = document.getElementById('erome-save-token');
+        if (saveTokenBtn) saveTokenBtn.textContent = t('saveToken');
+        const privP = document.getElementById('p-token-privacy');
+        if (privP) privP.textContent = t('tokenPrivacy');
+
+        // Refresh media list and counter
+        renderMediaList();
+
+        // Refresh inline buttons
+        document.querySelectorAll('.erome-inline-actions').forEach(el => el.remove());
+        addInlineButtons();
     };
 
     const openModal = () => {

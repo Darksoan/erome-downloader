@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.2.0] - 2026-05-09
+
+### Added
+
+- Multi-language support (i18n) with **Portuguese (BR)**, **English (US)**, and **Spanish (ES)**.
+- Language selector at the top of the Config tab with a modern globe icon.
+- `refreshModalTexts()` to update all visible strings in real-time when switching languages without closing the modal.
+- Inline button tooltips now translate with the selected language.
+
+### Changed
+
+- All hardcoded user-facing strings replaced with i18n translation keys.
+- Language choice is persisted via `GM_setValue('lang')` and restored on page load.
+- Inline buttons are re-rendered when language changes.
+- Error messages in `downloadBlob` and `sendMediaGroup` now respect the selected language.
+
 ## [4.1.0] - 2026-05-06
 
 ### Added
